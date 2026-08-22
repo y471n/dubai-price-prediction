@@ -4,6 +4,13 @@
 
 Establish a clear, reproducible foundation for the Dubai house price prediction project before starting feature engineering or model development.
 
+## Scope Notes & Sequencing
+
+- **Audit split across phases is deliberate:** structure/provenance reconnaissance happens here (issue #11), while deep quality analysis — missing values, duplicates, invalid values, outliers — lands in Phase 2 (issues #12–#13).
+- **Train/validation/test strategy lives in Phase 1** (issues #16–#18), even though `all_phases.md` originally placed it in Phase 2. The GitHub tracker is the source of truth.
+- **Problem-definition issues (#7–#10) are living drafts:** target and valid-sale definitions should be validated against raw-data reconnaissance findings, not frozen upfront.
+- **Phase 1 → Phase 2 boundary:** run a trivial end-to-end baseline through the evaluation harness and stand up experiment tracking + data versioning before feature exploration begins.
+
 ## Issues
 
 ### 1. Define Prediction Objective & Success Criteria
