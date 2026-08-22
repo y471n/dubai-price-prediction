@@ -1,10 +1,10 @@
 Phase 1 — Problem Definition & Data Foundation
 
-Define the prediction problem, target, success metrics, assumptions, data sources, project architecture, and reproducibility strategy.
+Define the prediction problem, target, success metrics, assumptions, data sources, project architecture, and reproducibility strategy. This includes the initial raw-data audit and the design of the train/validation/test strategy.
 
 Phase 2 — Data Quality & Exploration
 
-Build the data cleaning/validation pipeline, investigate distributions and relationships, identify leakage/outliers, and establish the train/validation/test strategy.
+Build the data cleaning/validation pipeline, investigate distributions and relationships, deepen leakage/outlier analysis (building on Phase 1 findings), set up experiment tracking and data versioning, and establish a trivial end-to-end baseline to validate the evaluation harness.
 
 Phase 3 — Feature Engineering
 
@@ -20,7 +20,7 @@ Tune the strongest models, perform robust validation, analyze errors across diff
 
 Phase 6 — Production Pipeline
 
-Turn the complete workflow into a reproducible pipeline: data → validation → features → model → prediction. Add testing, configuration, experiment/model tracking, and versioning.
+Turn the complete workflow into a reproducible pipeline: data → validation → features → model → prediction. Add testing, configuration, and pipeline/model versioning. (Experiment tracking and data versioning were pulled forward to Phase 2.)
 
 Phase 7 — Serving & Application Interface
 
