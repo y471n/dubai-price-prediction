@@ -1,36 +1,51 @@
-# Transaction Eligibility — Defining Valid Training Examples
 
-> **Issue:** [#8](https://github.com/y471n/dubai-price-prediction/issues/8) · **Phase:** 1 · **Status:** Draft for review
-> **Depends on:** [Problem Definition](problem-definition.md) (issue #7) — this document refines the population boundary that #7 left open.
-> **Supersedes:** the scratch column-treatment draft previously kept at `phases/phase1/task7.md` (its feature-level decisions are now governed by `docs/problem-definition.md` and the upcoming data dictionary, issue #9).
-
-## Evidence Provenance
-
-This ticket requires rules "supported by analysis of the actual dataset". The pinned raw extract
-(`data/transactions_2026-08-18_17-35-18_0001.csv`, 883,781 × 47) is no longer present in the working tree
-(`data/` is gitignored), so quantification uses three evidence tiers, each labelled inline:
-
-| Tag | Source | Dataset |
-|---|---|---|
-| **[V]** | Executed outputs of `notebooks/01-target-definition-recon.ipynb` | Pinned extract (883,781 rows) — authoritative |
-| **[P]** | Figures already committed in `docs/problem-definition.md` (issue #7, reviewed) | Pinned extract |
-| **[X]** | Fresh profiling of a newer official DLD export (`transactions-2026-08-19.csv`, 143,014 rows, Jan–Aug 2026, richer schema incl. `IS_OFFPLAN_EN`) | Same register, later window — cross-check & proportion estimates |
-| **[A]** | Archived exploration notebooks (`archive/notebooks/exp4…`) run on an older 1.66M-row superset extract | Domain vocabulary only — counts NOT reused |
-
-Rule-of-thumb: exact row counts for the pinned extract are given where **[V]/[P]** evidence exists;
-where only **[X]** exists, we state the *proportion* observed on the newer window and mark the pinned-extract
-count as *quantify-on-reload*. No raw data was modified at any point.
-
----
 
 ## 1. Recap: The Prediction Problem
 
-From `docs/problem-definition.md`: we predict the **total registered consideration (AED) of an arm's-length
-residential property sale in Dubai**, one prediction per DLD sale-transaction row. Issue #7 fixed the outer
-boundary (`trans_group_en == "Sales"`); issue #8 must decide everything inside it — off-plan vs ready,
-resales/transfers, lease-to-own lookalikes, zero-price rows, garbage dates, duplicates — and quantify each cut.
+
+criterias to be linked to sales predictions.
+
+
+
+| Column                 | Include in model? | Treatment          | Reason                                                                      |
+| ---------------------- | ----------------- | ------------------ | --------------------------------------------------------------------------- |
+| `actual_worth`         | ❌                 | Drop / investigate | Potentially derived from transaction/property value → **high leakage risk** |
+| `area_id`              | ❌                 | Drop               | Identifier; use `area_name_en` instead                                      |
+| `area_name_en`         | ✅                 | Feature            | **Very important location feature**                                         |
+| `building_name_en`     | ✅                 | Feature            | Building-specific pricing information                                       |
+| `has_parking`          | ✅                 | Feature            | Can influence property value                                                |
+| `instance_date`        | ✅                 | Feature            | **Very important**; captures market/time effects                            |
+| `master_project_en`    | ✅                 | Feature            | Project/community information                                               |
+| `meter_rent_price`     | ❌                 | Drop initially     | Rental price may introduce leakage depending on timing/source               |
+| `meter_sale_price`     | 🎯 **TARGET**     | Target             | This is what you're predicting                                              |
+| `nearest_landmark_en`  | ✅                 | Feature            | Location/accessibility                                                      |
+| `nearest_mall_en`      | ✅                 | Feature            | Accessibility/amenity proxy                                                 |
+| `nearest_metro_en`     | ✅                 | Feature            | Accessibility/location proxy                                                |
+| `no_of_parties_role_1` | ❌                 | Drop               | Administrative transaction information                                      |
+| `no_of_parties_role_2` | ❌                 | Drop               | Administrative transaction information                                      |
+| `no_of_parties_role_3` | ❌                 | Drop               | Administrative transaction information                                      |
+| `procedure_id`         | ❌                 | Drop               | Identifier                                                                  |
+| `procedure_name_en`    | ⚠️                | Transform          | Useful mainly for identifying sale/off-plan type                            |
+| `project_name_en`      | ✅                 | Feature            | **Very important**                                                          |
+| `project_number`       | ❌                 | Drop               | Identifier for project                                                      |
+| `property_sub_type_en` | ✅                 | Feature            | Studio, 1 B/R, 2 B/R, etc.                                                  |
+| `property_sub_type_id` | ❌                 | Drop               | Identifier                                                                  |
+| `property_type_en`     | ✅                 | Feature            | Flat, Villa, etc.                                                           |
+| `property_type_id`     | ❌                 | Drop               | Identifier                                                                  |
+| `property_usage_en`    | ✅/⚠️              | Filter + Feature   | Residential/commercial etc.; important for defining population              |
+| `reg_type_en`          | ⚠️                | Investigate        | May contain transaction/registration meaning                                |
+| `reg_type_id`          | ❌                 | Drop               | Identifier                                                                  |
+| `rent_value`           | ❌                 | Drop initially     | Potential leakage / different target domain                                 |
+| `rooms_en`             | ✅                 | Feature            | Number/type of rooms                                                        |
+| `transaction_id`       | ❌                 | Validation only    | Useful for duplicate detection, not prediction                              |
+| `trans_group_en`       | ⚠️                | Filter/validation  | Useful for identifying `Sales`                                              |
+| `trans_group_id`       | ❌                 | Drop               | Identifier                                                                  |
+| `load_timestamp`       | ❌                 | Drop               | Data ingestion timestamp; not property information                          |
+
+
 
 ---
+
 
 ## 2. Transaction Types Present in the Dataset
 
@@ -229,12 +244,6 @@ in a re-download.
 | E5 | Non-residential usage | ~21,700 est. | ~3.2% of register | [X] |
 | E6 | Exact duplicate IDs | TBD | TBD | reload |
 
-**Projected eligible pool:** ≈ 650k rows ≈ **96% of Sales**, ≈ **73–74% of the raw extract** (rough projection
-combining [V] exclusions with [X] proportions; to be replaced by exact counts in the profiling pipeline).
-
-The headline: eligibility filtering costs ~quarter of the raw data, almost entirely from E1, whose exclusion is
-semantically mandatory. Every refinement *inside* Sales costs <4% combined — we are not throwing away useful
-information to achieve a clean prediction problem.
 
 ---
 
