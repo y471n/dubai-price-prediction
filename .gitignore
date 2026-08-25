@@ -12,5 +12,8 @@ wheels/
 .kilo/
 .ipynb_checkpoints/
 .DS_Store
+learning/
 # Raw data
 data/
+# Agent guidance file (not to be committed)
+AGENTS.md
