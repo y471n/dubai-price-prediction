@@ -5,13 +5,13 @@
 
 ## What Are We Predicting?
 
-The **total transaction price, in AED, of a residential property sale in Dubai**, at the point of registration with the Dubai Land Department (DLD).
+The **total transaction price, in AED, of a residential property sale in Dubai**, at the moment the property is first listed for sale.
 
 This is a regression problem grounded in a real use case: estimating what a property will sell for given its characteristics and market context.
 
 ## What Does One Prediction Represent?
 
-**One prediction = one completed sale transaction** — a single row in the DLD transactions register where `trans_group_en == "Sales"`, identified by `transaction_id` and dated by `instance_date`.
+One prediction = the eventual sale price of a residential property that is currently listed for sale — a single row in the DLD transactions register where `trans_group_en == "Sales"`, identified by `transaction_id` and dated by `instance_date` (the eventual sale date, unknown at prediction time).
 
 | Dataset fact | Value | Source |
 |---|---|---|
@@ -46,22 +46,21 @@ Could price vs price/m² lead to materially different modeling behavior? In prin
 | Include mortgages/gifts to enlarge training data | Rejected | Their amounts are not sale prices; would poison the target |
 | Restrict further (e.g., existing flats only) | Deferred | Valid-transaction criteria are issue #8's scope; this doc defines the outer boundary only |
 
-## Assumptions & Open Questions
-
-**Assumptions**
+## Assumptions
 - `actual_worth` reflects true consideration paid at registration.
-- `instance_date` approximates the transaction's market moment.
+- `instance_date` approximates the transaction's market moment and is **unknown** at prediction time (listing).
 - One row = one property-level transaction (identity/repeat-sale analysis pending, #13).
+- At prediction time (listing), the property's intrinsic characteristics (location, size, type, amenities, etc.) are known.
 
-**Open questions (tracked in later issues)**
+## Open questions (tracked in later issues)
 - Off-plan vs existing-property split: same model or separate treatment? (#8)
 - Extreme outliers: max area 342M m², max ppm 14.4M AED/m², 3 zero-price rows → data-entry artifacts? (#12)
 - Untranslated category values in English columns (e.g., `أخرى` alongside `Other`, n=3,096) (#12/#14)
 - Temporal coverage: bulk of data is ~2016–2026, but 2,924 rows (<0.4%) carry implausible dates (earliest parsed: year 1416 — Hijri/garbage artifacts) (#12)
 - Train/validation/test strategy over time (#16–#18)
+- How to handle the fact that listing date is not explicitly in the dataset; we assume prediction is made at the first listing occurrence.
 
 ## Review Questions
-
-- **Useful real-world problem?** Yes — price estimation at registration is actionable for buyers, sellers, and lenders.
+- **Useful real-world problem?** Yes — price estimation at listing is actionable for buyers, sellers, and lenders (e.g., setting listing price, evaluating offer).
 - **Would another ML engineer interpret it the same way?** Yes — population, unit, and units are stated explicitly with counts; the equivalence proof removes ambiguity between price formulations.
-- **Hidden assumptions?** Registration date ≈ valuation moment, and single-row-per-transaction identity — both flagged above for verification.
+- **Hidden assumptions?** Registration date ≈ valuation moment, and single-row-per-transaction identity — both flagged above for verification. Additionally, we assume that the set of features known at listing can be approximated by the property characteristics present in the dataset, despite the absence of an explicit listing date field.
