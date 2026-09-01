@@ -290,7 +290,7 @@ The dataset carries **dual-language columns** for most categorical fields (Arabi
 | Existing Properties | 562,776 | 63.7% |
 | Off-Plan Properties | 321,005 | 36.3% |
 
-Identical distribution to `reg_type_en` — maps to Existing vs Off-Plan classification.
+The registration type distinguishes existing from off-plan properties.
 
 ### 6.7 Procedures (`procedure_name_en`)
 
