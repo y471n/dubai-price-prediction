@@ -36,7 +36,6 @@ def audit(path: Path = DATA_PATH) -> dict:
         procedures_en: Counter = Counter()
         rent_values: list[float] = []
         sale_prices: list[float] = []
-        areas_list: list[str] = []
         procedure_areas: list[float] = []
 
         for row in reader:
@@ -65,7 +64,6 @@ def audit(path: Path = DATA_PATH) -> dict:
                 dates.append(row[7])
             if row[3]:
                 areas_en[row[3]] += 1
-                areas_list.append(row[3])
             if row[5]:
                 building_en[row[5]] += 1
             if row[9]:
@@ -232,21 +230,21 @@ def print_summary(summary: dict) -> None:
     print(f"  Count: {rv['count']:,}")
     print(f"  Min: {rv['min']}")
     print(f"  Max: {rv['max']}")
-    print(f"  Mean: {rv['mean']:.2f}")
+    print(f"  Mean: {rv['mean']:.2f}" if rv["mean"] is not None else "  Mean: N/A")
 
     print(f"\n--- METER SALE PRICE ---")
     sp = summary["meter_sale_price_stats"]
     print(f"  Count: {sp['count']:,}")
     print(f"  Min: {sp['min']}")
     print(f"  Max: {sp['max']}")
-    print(f"  Mean: {sp['mean']:.2f}")
+    print(f"  Mean: {sp['mean']:.2f}" if sp["mean"] is not None else "  Mean: N/A")
 
     print(f"\n--- PROCEDURE AREA ---")
     pa = summary["procedure_area_stats"]
     print(f"  Count: {pa['count']:,}")
     print(f"  Min: {pa['min']}")
     print(f"  Max: {pa['max']}")
-    print(f"  Mean: {pa['mean']:.2f}")
+    print(f"  Mean: {pa['mean']:.2f}" if pa["mean"] is not None else "  Mean: N/A")
 
 
 if __name__ == "__main__":
